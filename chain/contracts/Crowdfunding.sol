@@ -50,4 +50,37 @@ contract Crowdfunding{
         donatedAmount[_campaignID][msg.sender] += _amount;
         token.transferFrom(msg.sender, address(this), _amount);
     }
+
+    function unDonate(uint _campaignID, uint _amount) public {
+        Author storage AuthorVar = Authors[_campaignID];
+        
+        if(AuthorVar.endAt >= block.timestamp){
+            donatedAmount[_campaignID][msg.sender] -= _amount;
+            AuthorVar.donatingAmount -= _amount;
+            token.transfer(msg.sender, _amount);
+        }
+        else if(AuthorVar.endAt <= block.timestamp) {
+            if(AuthorVar.goal >= AuthorVar.donatingAmount){
+                donatedAmount[_campaignID][msg.sender] = _amount;
+                AuthorVar.donatingAmount -= _amount;
+                token.transfer(msg.sender, _amount);
+
+            }
+            else{
+                revert("Campaign Is Ended");
+            }
+        }
+        else {
+            revert("Something went wrong");
+        }
+    }
+
+    function claim(uint _campaignID) public {
+        Author storage AuthorVar = Authors[_campaignID];
+        require(msg.sender == AuthorVar.owner, "only owner can claim");
+        require(block.timestamp > AuthorVar.endAt, "Not Ended");
+        require(AuthorVar.donatingAmount >= AuthorVar.goal, "Goal not completed");
+        require(!AuthorVar.claimed, " Already claimed ");
+        token.transfer(AuthorVar.owner, AuthorVar.donatingAmount);
+    }
 }
