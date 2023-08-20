@@ -38,13 +38,13 @@ contract Crowdfunding{
     function creator(uint _goal) public{
         require(_goal > 0, "Goal is not Equal to Zero");
         CampaignCount++;
-        Authors[CampaignCount] = Author(msg.sender, CampaignCount, _goal, 0, block.timestamp, block.timestamp + 10, false);
+        Authors[CampaignCount] = Author(msg.sender, CampaignCount, _goal, 0, block.timestamp, block.timestamp + 10000, false);
 
     }
 
     function donate(uint _campaignID, uint _amount) public payable{
         Author storage AuthorVar = Authors[_campaignID];
-        require(AuthorVar.endAt == block.timestamp, "This Campaign Has been Ended");
+        require(AuthorVar.endAt >= block.timestamp, "This Campaign Has been Ended");
         AuthorVar.donatingAmount += _amount;
 
         donatedAmount[_campaignID][msg.sender] += _amount;
