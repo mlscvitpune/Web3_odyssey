@@ -28,6 +28,11 @@ describe("Crowdfunding contract", function () {
     expect(campaign.goal).to.equal(100);
   });
 
+  it("should revert if goal is 0", async () =>{
+    await expect(crowdfunding.connect(owner).creator(0)).to.be.revertedWith("Goal is not Equal to Zero");
+    
+  })
+
   it("should donate to a campaign", async function () {
     await erc20Token.mint(donor.address, 1000);
 
@@ -40,10 +45,24 @@ describe("Crowdfunding contract", function () {
     expect(donatedAmount).to.equal(50);
   });
 
+  it("Owner should not be donor of his campaign", async () => {
+    await erc20Token.mint(owner.address, 1000);
+
+    await erc20Token.connect(owner).approve(crowdfunding.target, 1000);
+
+    await expect(crowdfunding.connect(owner).donate(1, 50)).to.be.revertedWith("Owner can not donate to his campaign");
+
+    
+  })
+
   it("should un-donate from a campaign", async function () {
     await crowdfunding.connect(donor).unDonate(1, 20);
     const donatedAmount = await crowdfunding.donatedAmount(1, donor.address);
 
     expect(donatedAmount).to.equal(30);
   });
+
+
 });
+
+

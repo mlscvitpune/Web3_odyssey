@@ -44,6 +44,8 @@ contract Crowdfunding{
 
     function donate(uint _campaignID, uint _amount) public payable{
         Author storage AuthorVar = Authors[_campaignID];
+        require(msg.sender != Authors[_campaignID].owner, "Owner can not donate to his campaign");
+
         require(AuthorVar.endAt >= block.timestamp, "This Campaign Has been Ended");
         AuthorVar.donatingAmount += _amount;
 
