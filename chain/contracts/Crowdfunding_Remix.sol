@@ -1,26 +1,19 @@
-//SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.19;
-
-// import "./ERC_Remote.sol";
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.0 <0.9.0;
 
 
- contract Crowdfunding_Remix{
+contract CrowdFunding{
 
-    uint public CampaignCount;
-    // IERC20 defines function signatures without specifying behavior; the function names, inputs and outputs, but no process. ERC20 inherits this Interface and is required to implement all the functions described or else the contract will not deploy.
+    uint public CampignCount;
 
-     address immutable owner;
-
-    mapping(uint => mapping(address => uint)) public donatedAmount;
-    mapping(uint => Author) public Authors;
-
-    constructor() {
-        owner = msg.sender;
+    mapping(uint => mapping(address => uint)) public pledgedAmount;
+    mapping (uint => Creater) public Creaters;
+     
+    constructor(address _token){
     }
 
 
-    struct Author{
+    struct Creater{
         address owner;
         uint id;
         uint goal;
@@ -30,62 +23,72 @@ pragma solidity ^0.8.19;
         bool claimed;
     }
 
-
-    struct Donor{
-        address donor;
-        uint campaignID;
+    struct Donater{
+        address donater;
+        uint compaignID;
         uint amount;
     }
-
-    function creator(uint _goal) public{
-        require(_goal > 0, "Goal is not Equal to Zero");
-        CampaignCount++;
-        Authors[CampaignCount] = Author(msg.sender, CampaignCount, _goal, 0, block.timestamp, block.timestamp + 10000, false);
-       
+ 
+ 
+    function creater(uint _goal)public{
+      require(_goal > 0 , "Goal is not Equal to Zero");
+      CampignCount++;
+      Creaters[CampignCount] = Creater(msg.sender , CampignCount , _goal , 0 ,block.timestamp , block.timestamp + 10000 ,false);
     }
 
+    function payContract() public payable{
 
-     
+    }
 
-    function donate(uint256 _campaignID, uint256 _amount) public payable{
-        Author storage AuthorVar = Authors[_campaignID];
-        require(AuthorVar.endAt >= block.timestamp, "This Campaign Has been Ended");
-        AuthorVar.donatingAmount += _amount;
-        
-        donatedAmount[_campaignID][msg.sender] += _amount;
-           payable(AuthorVar.owner).transfer(address(this).balance);
+    function payUser() public payable{
+        payable(msg.sender).transfer(1 ether);
+    }
+// Donateing Money
+    function pledge(uint _compaignID , uint _amount ) public payable{
+        Creater storage CreaterVar = Creaters[_compaignID];
+        require(CreaterVar.endAt >= block.timestamp ,"This Compaign Has been Ended");
+        CreaterVar.donatingAmount +=_amount;     
+
+        pledgedAmount[_compaignID][msg.sender] += _amount;
         
     }
 
-    function unDonate(uint _campaignID, uint _amount) public payable{
-        Author storage AuthorVar = Authors[_campaignID];
-        
-        if(AuthorVar.endAt >= block.timestamp){
-            donatedAmount[_campaignID][msg.sender] -= _amount;
-            AuthorVar.donatingAmount -= _amount;
-            bool sendSuccess= payable(msg.sender).send(address(this).balance * 1e18);
-    require(sendSuccess, "Couldn't send the funds");
-        }
-        else if(AuthorVar.endAt <= block.timestamp) {
-            if(AuthorVar.goal >= AuthorVar.donatingAmount){
-                donatedAmount[_campaignID][msg.sender] = _amount;
-                AuthorVar.donatingAmount -= _amount;
-                bool sendSuccess= payable(msg.sender).send(address(this).balance);
-    require(sendSuccess, "Couldn't send the funds");
+// Donater withdraw money they are not donating 
+    function unplege(uint _compaignID , uint _amount )public{
+        Creater storage CreaterVar = Creaters[_compaignID];
 
+        if(CreaterVar.endAt >= block.timestamp ){
+             pledgedAmount[_compaignID][msg.sender] -= _amount;
+             CreaterVar.donatingAmount -=_amount; 
+            payable(msg.sender).transfer(_amount);
+        
+            }
+        else if(CreaterVar.endAt <= block.timestamp ) {
+            if(CreaterVar.goal >= CreaterVar.donatingAmount){
+               pledgedAmount[_compaignID][msg.sender] -= _amount;
+               CreaterVar.donatingAmount -=_amount; 
+               payable(msg.sender).transfer(_amount);
             }
             else{
-                revert("Campaign Is Ended");
+                revert("Campign Is Ended");
             }
-        }
-        else {
-            revert("Something went wrong");
-        }
+        }else{
+            revert("Something went wrong 2");
+        }       
+    
+    
     }
 
+   function claim(uint _compaignID )public {
+               Creater storage CreaterVar = Creaters[_compaignID];
+               require(msg.sender == CreaterVar.owner , "only Owner Can Claim");
+            //    require(block.timestamp > CreaterVar.endAt , "Not ended ");
+            //    require(CreaterVar.donatingAmount >= CreaterVar.goal , "Goal Not Completed");
+            //    require(!CreaterVar.claimed ," Already claimed ");
+               CreaterVar.claimed =true;
 
-    function seeDonatedAmount(uint _campaignID) public view returns(uint){
-        Author storage AuthorVar = Authors[_campaignID];
-        return AuthorVar.donatingAmount;
+              payable(CreaterVar.owner).transfer(CreaterVar.donatingAmount);
+
     }
+
 }
