@@ -42,7 +42,7 @@ describe("Crowdfunding contract", function () {
 
     const donatedAmount = await crowdfunding.donatedAmount(1, donor.address);
 
-    expect(donatedAmount).to.equal(50);
+    expect(donatedAmount).to.equal(50).to.emit(crowdfunding, 'Donate').withArgs(donor.address, donatedAmount);
   });
 
   it("Owner should not be donor of his campaign", async () => {
