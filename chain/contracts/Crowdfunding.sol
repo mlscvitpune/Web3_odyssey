@@ -35,6 +35,8 @@ contract Crowdfunding{
         uint amount;
     }
 
+    event Donate(address indexed _from, uint value);
+
     function creator(uint _goal) public{
         require(_goal > 0, "Goal is not Equal to Zero");
         CampaignCount++;
@@ -51,6 +53,8 @@ contract Crowdfunding{
 
         donatedAmount[_campaignID][msg.sender] += _amount;
         token.transferFrom(msg.sender, address(this), _amount);
+
+        emit Donate(msg.sender, _amount);
     }
 
     function unDonate(uint _campaignID, uint _amount) public {
