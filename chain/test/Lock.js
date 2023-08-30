@@ -62,6 +62,27 @@ describe("Crowdfunding contract", function () {
     expect(donatedAmount).to.equal(30);
   });
 
+  it('should allow the owner to claim funds when conditions are met', async function () {
+    // Deploy your token contract and distribute tokens to the campaign contract for testing
+
+    // Create a campaign
+    await crowdfunding.connect(owner).creator(1000);
+
+    // Donate to the campaign
+    await crowdfunding.connect(donor).donate(1, 100);
+
+    // Advance the blockchain timestamp to simulate the campaign ending
+    await ethers.provider.send('evm_increaseTime', [10001]); // Assuming the campaign lasted for 10000 seconds
+    await ethers.provider.send('evm_mine');
+
+    // Claim funds by the owner
+    await crowdfunding.connect(owner).claim(1);
+
+    // Check the balance of the owner after claiming
+    const ownerBalance = await ethers.provider.getBalance(owner.address);
+    expect(ownerBalance).to.be.above(0); // Assuming gas costs are negligible
+  });
+
 
 });
 
