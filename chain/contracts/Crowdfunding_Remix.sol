@@ -7,13 +7,13 @@ contract CrowdFunding{
     uint public CampignCount;
 
     mapping(uint => mapping(address => uint)) public pledgedAmount;
-    mapping (uint => Creater) public Creaters;
+    mapping (uint => Author) public Authors;
      
     constructor(address _token){
     }
 
 
-    struct Creater{
+    struct Author{
         address owner;
         uint id;
         uint goal;
@@ -30,10 +30,11 @@ contract CrowdFunding{
     }
  
  
-    function creater(uint _goal)public{
+    function creator(uint _goal)public{
+
       require(_goal > 0 , "Goal is not Equal to Zero");
       CampignCount++;
-      Creaters[CampignCount] = Creater(msg.sender , CampignCount , _goal , 0 ,block.timestamp , block.timestamp + 10000 ,false);
+      Authors[CampignCount] = Author(msg.sender , CampignCount , _goal , 0 ,block.timestamp , block.timestamp + 10000 ,false);
     }
 
     function payContract() public payable{
@@ -44,29 +45,29 @@ contract CrowdFunding{
         payable(msg.sender).transfer(1 ether);
     }
 // Donateing Money
-    function pledge(uint _compaignID , uint _amount ) public payable{
-        Creater storage CreaterVar = Creaters[_compaignID];
-        require(CreaterVar.endAt >= block.timestamp ,"This Compaign Has been Ended");
-        CreaterVar.donatingAmount +=_amount;     
+    function donate(uint _compaignID , uint _amount ) public payable{
+        Author storage AuthorVar = Authors[_compaignID];
+        require(AuthorVar.endAt >= block.timestamp ,"This Compaign Has been Ended");
+        AuthorVar.donatingAmount +=_amount;     
 
         pledgedAmount[_compaignID][msg.sender] += _amount;
         
     }
 
 // Donater withdraw money they are not donating 
-    function unplege(uint _compaignID , uint _amount )public{
-        Creater storage CreaterVar = Creaters[_compaignID];
+    function unDonate(uint _compaignID , uint _amount )public{
+        Author storage AuthorVar = Authors[_compaignID];
 
-        if(CreaterVar.endAt >= block.timestamp ){
+        if(AuthorVar.endAt >= block.timestamp ){
              pledgedAmount[_compaignID][msg.sender] -= _amount;
-             CreaterVar.donatingAmount -=_amount; 
+             AuthorVar.donatingAmount -=_amount; 
             payable(msg.sender).transfer(_amount);
         
             }
-        else if(CreaterVar.endAt <= block.timestamp ) {
-            if(CreaterVar.goal >= CreaterVar.donatingAmount){
+        else if(AuthorVar.endAt <= block.timestamp ) {
+            if(AuthorVar.goal >= AuthorVar.donatingAmount){
                pledgedAmount[_compaignID][msg.sender] -= _amount;
-               CreaterVar.donatingAmount -=_amount; 
+               AuthorVar.donatingAmount -=_amount; 
                payable(msg.sender).transfer(_amount);
             }
             else{
@@ -80,14 +81,14 @@ contract CrowdFunding{
     }
 
    function claim(uint _compaignID )public {
-               Creater storage CreaterVar = Creaters[_compaignID];
-               require(msg.sender == CreaterVar.owner , "only Owner Can Claim");
-            //    require(block.timestamp > CreaterVar.endAt , "Not ended ");
-            //    require(CreaterVar.donatingAmount >= CreaterVar.goal , "Goal Not Completed");
-            //    require(!CreaterVar.claimed ," Already claimed ");
-               CreaterVar.claimed =true;
+               Author storage AuthorVar = Authors[_compaignID];
+               require(msg.sender == AuthorVar.owner , "only Owner Can Claim");
+               require(block.timestamp > AuthorVar.endAt , "Not ended ");
+               require(AuthorVar.donatingAmount >= AuthorVar.goal , "Goal Not Completed");
+               require(!AuthorVar.claimed ," Already claimed ");
+               AuthorVar.claimed =true;
 
-              payable(CreaterVar.owner).transfer(CreaterVar.donatingAmount);
+              payable(AuthorVar.owner).transfer(AuthorVar.donatingAmount);
 
     }
 
