@@ -3,8 +3,9 @@
 pragma solidity ^0.8.19;
 
 import "./ERC_Remote.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Crowdfunding{
+contract Crowdfunding is ReentrancyGuard{
 
     uint public CampaignCount;
     IERC20 public token;
@@ -84,7 +85,7 @@ contract Crowdfunding{
         }
     }
 
-    function claim(uint _campaignID) public {
+    function claim(uint _campaignID) public nonReentrant{
         Author storage AuthorVar = Authors[_campaignID];
         require(msg.sender == AuthorVar.owner, "only owner can claim");
         require(block.timestamp > AuthorVar.endAt, "Not Ended");

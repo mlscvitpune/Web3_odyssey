@@ -89,7 +89,7 @@ contract CrowdFunding{
                AuthorVar.claimed =true;
 
               payable(AuthorVar.owner).transfer(AuthorVar.donatingAmount);
-
+                
     }
 
 }
