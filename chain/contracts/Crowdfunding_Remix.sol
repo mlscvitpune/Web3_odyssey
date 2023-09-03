@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 
-
 contract CrowdFunding{
-
     uint public CampignCount;
 
     mapping(uint => mapping(address => uint)) public pledgedAmount;
     mapping (uint => Author) public Authors;
-     
+
     constructor(address _token){
+
     }
 
-
-    struct Author{
+     struct Author{
         address owner;
         uint id;
         uint goal;
@@ -23,14 +21,13 @@ contract CrowdFunding{
         bool claimed;
     }
 
-    struct Donater{
+      struct Donor{
         address donater;
         uint compaignID;
         uint amount;
     }
- 
- 
-    function creator(uint _goal)public{
+
+     function creator(uint _goal)public{
 
       require(_goal > 0 , "Goal is not Equal to Zero");
       CampignCount++;
@@ -44,7 +41,7 @@ contract CrowdFunding{
     function payUser() public payable{
         payable(msg.sender).transfer(1 ether);
     }
-// Donateing Money
+
     function donate(uint _compaignID , uint _amount ) public payable{
         Author storage AuthorVar = Authors[_compaignID];
         require(AuthorVar.endAt >= block.timestamp ,"This Compaign Has been Ended");
@@ -54,8 +51,7 @@ contract CrowdFunding{
         
     }
 
-// Donater withdraw money they are not donating 
-    function unDonate(uint _compaignID , uint _amount )public{
+    function unDonate(uint _compaignID , uint _amount )public payable{
         Author storage AuthorVar = Authors[_compaignID];
 
         if(AuthorVar.endAt >= block.timestamp ){
@@ -75,12 +71,14 @@ contract CrowdFunding{
             }
         }else{
             revert("Something went wrong 2");
-        }       
+        }     
+        
+          
     
     
     }
 
-   function claim(uint _compaignID )public {
+      function claim(uint _compaignID )public payable{
                Author storage AuthorVar = Authors[_compaignID];
                require(msg.sender == AuthorVar.owner , "only Owner Can Claim");
                require(block.timestamp > AuthorVar.endAt , "Not ended ");
@@ -91,5 +89,6 @@ contract CrowdFunding{
               payable(AuthorVar.owner).transfer(AuthorVar.donatingAmount);
                 
     }
+
 
 }

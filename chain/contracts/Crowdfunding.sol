@@ -5,7 +5,7 @@ pragma solidity ^0.8.19;
 import "./ERC_Remote.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Crowdfunding is ReentrancyGuard{
+contract Crowdfunding is ERC_Remote, ReentrancyGuard{
 
     uint public CampaignCount;
     IERC20 public token;
