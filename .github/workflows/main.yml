@@ -1,0 +1,27 @@
+name: "Code Coverage on commit"
+on: 
+    push: 
+      branches: 
+        - main
+
+  jobs: 
+    tests: 
+      name: "TestsOnCommits"
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v1
+
+        - name: Setup Node.js
+          uses: actions.setup-node@v3
+          with: 
+              node-version: "16"
+
+        - name: Install dependencies
+          working-directory: ./chain
+          shell: bash
+          run: npm install
+
+        - name: Run tests
+          working-directory: ./chain
+          shell: bash
+          run: npm run test
