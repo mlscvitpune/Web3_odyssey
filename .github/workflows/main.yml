@@ -4,8 +4,8 @@ on:
       branches: 
         - main
 
-  jobs: 
-    tests: 
+jobs: 
+     tests: 
       name: "TestsOnCommits"
       runs-on: ubuntu-latest
       steps:
